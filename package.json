@@ -39,9 +39,14 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
     "typescript": "~5.8.3"
+=======
+    "@types/react": "~19.0.10",
+    "typescript": "^5.8.3"
+>>>>>>> Stashed changes
 =======
     "@types/react": "~19.0.10",
     "typescript": "^5.8.3"
