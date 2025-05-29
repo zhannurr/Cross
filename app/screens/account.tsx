@@ -7,6 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { ref, set, update } from 'firebase/database';
 import { db } from '../../firebase/config';
+import SettingsPanel from '../components/SettingsPanel_temp';
+
+
 
 const AccountScreen = () => {
   const { user, isGuest, logout, exitGuestMode, preferences, updatePreferences } = useAuth();
@@ -144,74 +147,9 @@ const AccountScreen = () => {
               <Ionicons name="settings" size={24} color={theme.primary} />
               <Text style={[styles.cardTitle, { color: theme.text }]}>{t('settings')}</Text>
             </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <Ionicons name="moon" size={20} color={theme.text} />
-                <Text style={[styles.settingText, { color: theme.text }]}>{t('darkMode')}</Text>
-              </View>
-              <Switch
-                value={isDarkMode}
-                onValueChange={handleToggleTheme}
-                thumbColor={theme.primary}
-                trackColor={{ false: theme.textSecondary, true: theme.primary }}
-              />
-            </View>
-
-            <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <Ionicons name="language" size={20} color={theme.text} />
-                <Text style={[styles.settingText, { color: theme.text }]}>{t('language')}</Text>
-              </View>
-              <View style={styles.languageButtons}>
-                <TouchableOpacity
-                  style={[
-                    styles.langButton,
-                    currentLanguage === 'en' && { backgroundColor: theme.primary },
-                    { borderColor: theme.primary }
-                  ]}
-                  onPress={() => changeLanguage('en')}
-                >
-                  <Text style={[
-                    styles.langButtonText,
-                    currentLanguage === 'en' ? { color: 'white' } : { color: theme.text }
-                  ]}>
-                    EN
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.langButton,
-                    currentLanguage === 'ru' && { backgroundColor: theme.primary },
-                    { borderColor: theme.primary }
-                  ]}
-                  onPress={() => changeLanguage('ru')}
-                >
-                  <Text style={[
-                    styles.langButtonText,
-                    currentLanguage === 'ru' ? { color: 'white' } : { color: theme.text }
-                  ]}>
-                    RU
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.langButton,
-                    currentLanguage === 'kk' && { backgroundColor: theme.primary },
-                    { borderColor: theme.primary }
-                  ]}
-                  onPress={() => changeLanguage('kk')}
-                >
-                  <Text style={[
-                    styles.langButtonText,
-                    currentLanguage === 'kk' ? { color: 'white' } : { color: theme.text }
-                  ]}>
-                    KK
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <SettingsPanel />
           </View>
+
 
           <View style={styles.buttonsContainer}>
             {isEditing ? (
