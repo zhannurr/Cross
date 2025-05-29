@@ -1,0 +1,279 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { auth, db } from '../firebase/config';
+import {
+  User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { ref, set, get, update, child } from 'firebase/database'; // 🔄 Realtime DB
+
+interface UserPreferences {
+  theme: 'light' | 'dark';
+  language: 'en' | 'ru' | 'kk';
+}
+
+const defaultPrefs: UserPreferences = {
+  theme: 'light',
+  language: 'en'
+};
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  isGuest: boolean;
+  preferences: UserPreferences | null;
+  register: (email: string, password: string, name: string, surname: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
+  updatePreferences: (prefs: Partial<UserPreferences>) => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setPreferences({
+            theme: data.preferences?.theme || 'light',
+            language: data.preferences?.language || 'en'
+          });
+        } else {
+          await set(userRef, {
+            email: user.email,
+            preferences: defaultPrefs
+          });
+          setPreferences(defaultPrefs);
+        }
+      } else {
+        setPreferences(null);
+      }
+
+      setUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const updatePreferences = async (prefs: Partial<UserPreferences>) => {
+    if (!user) return;
+
+    const newPrefs = {
+      ...preferences,
+      ...prefs
+    } as UserPreferences;
+
+    try {
+      const userRef = ref(db, `users/${user.uid}/preferences`);
+      await update(userRef, newPrefs);
+      setPreferences(newPrefs);
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+      throw error;
+    }
+  };
+
+  const register = async (email: string, password: string, name: string, surname: string) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userRef = ref(db, `users/${userCredential.user.uid}`);
+      await set(userRef, {
+        email,
+        name,
+        surname,
+        preferences: defaultPrefs
+      });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      throw new Error(error.message);
+    }
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw new Error(error.message);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      throw new Error(error.message);
+    }
+  };
+
+  const enterGuestMode = () => {
+    setIsGuest(true);
+    setUser(null);
+  };
+
+  const exitGuestMode = () => {
+    setIsGuest(false);
+  };
+
+  return (
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      isGuest,
+      preferences,
+      register,
+      login,
+      logout,
+      enterGuestMode,
+      exitGuestMode,
+      updatePreferences
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
+\\import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getAnalytics } from 'firebase/analytics';
+import { getDatabase } from 'firebase/database'; // ✅ Realtime DB
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA9PQDoiFu95qMoRx8qtYSVLLW67sAf4Q4",
+  authDomain: "unitsconverter-feb0e.firebaseapp.com",
+  projectId: "unitsconverter-feb0e",
+  storageBucket: "unitsconverter-feb0e.appspot.com",
+  messagingSenderId: "1060375850448",
+  appId: "1:1060375850448:web:c77da9d0aa1c54ecd29dd5",
+  measurementId: "G-VJRNZT6BTH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app); // ✅ Realtime DB
+let analytics;
+
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+}
+
+export { auth, db, analytics };
+\\// _layout.tsx
+import { Stack } from "expo-router";
+import React from "react";
+import { ThemeProvider, useTheme } from "./theme/theme";
+
+import { AuthProvider } from "../auth/AuthContext"; 
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <LayoutWithTheme />
+      </ThemeProvider>
+    </AuthProvider>
+  );
+}
+
+// Separate layout using theme
+function LayoutWithTheme() {
+  const { theme } = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.background },
+      }}
+    />
+  );
+}
+\\import React, { useState } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Image } from 'react-native';
+
+import About from './screens/about';
+import Converter from './screens/converter';
+import Account from './screens/account';
+import Settings from './screens/settings';
+import Login from './screens/login';
+
+import { useTheme } from './theme/theme';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../auth/AuthContext';
+
+const aboutIcon = require('../assets/images/information.png');
+const converterIcon = require('../assets/images/math.png');
+const accountIcon = require('../assets/images/user.png');
+const settingsIcon = require('../assets/images/settings.png');
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function TabNavigator() {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarStyle: {
+          backgroundColor: theme.tabBarBackground,
+          borderTopColor: theme.card,
+        },
+        tabBarIcon: ({ color, size }) => {
+          let iconSource;
+          if (route.name === 'About') iconSource = aboutIcon;
+          else if (route.name === 'Converter') iconSource = converterIcon;
+          else if (route.name === 'Account') iconSource = accountIcon;
+          else if (route.name === 'Settings') iconSource = settingsIcon;
+
+          return (
+            <Image source={iconSource} style={{ width: size, height: size, tintColor: color }} />
+          );
+        },
+        tabBarActiveTintColor: theme.tabBarActiveTint,
+        tabBarInactiveTintColor: theme.tabBarInactiveTint,
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen name="About" component={About} options={{ tabBarLabel: t('about') }} />
+      <Tab.Screen name="Converter" component={Converter} options={{ tabBarLabel: t('converter') }} />
+      <Tab.Screen name="Account" component={Account} options={{ tabBarLabel: t('account') }} />
+      <Tab.Screen name="Settings" component={Settings} options={{ tabBarLabel: t('settings') }} />
+    </Tab.Navigator>
+  );
+}
+
+export default function Index() {
+  const { user, isGuest } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+   return (
+    <Stack.Navigator>
+      {!user && !isGuest ? (
+        <Stack.Screen name="Login" component={Login} />
+      ) : (
+        <Stack.Screen name="Main" component={TabNavigator} />
+      )}
+    </Stack.Navigator>
+  );
+}

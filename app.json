@@ -2,9 +2,13 @@
   "expo": {
     "scheme": "acme",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-localization"
     ],
     "name": "UnitsConverterAppNew",
-    "slug": "UnitsConverterAppNew"
+    "slug": "UnitsConverterAppNew",
+    "android": {
+      "package": "com.anonymous.UnitsConverterAppNew"
+    }
   }
 }
