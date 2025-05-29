@@ -102,6 +102,14 @@ const convertTemperature = (value: number, fromUnit: string, toUnit: string) => 
   }
 };
 
+const unitTypeImages: { [key in keyof typeof unitTypes]: any } = {
+  length: require('../../assets/images/length.png'),
+  weight: require('../../assets/images/mass.png'),
+  time: require('../../assets/images/time.png'),
+  temperature: require('../../assets/images/temperature.png'),
+};
+
+
 const SimpleSelect = ({ 
   value, 
   items, 
@@ -356,10 +364,11 @@ const Converter: React.FC = () => {
           )}
           <View style={styles.imageContainer}>
             <Image
-              source={require('../../assets/images/length.png')}
+              source={unitTypeImages[currentUnitType]}
               style={{ width: 200, height: 200 }}
               resizeMode="contain"
             />
+
           </View>
         </View>
       </ScrollView>

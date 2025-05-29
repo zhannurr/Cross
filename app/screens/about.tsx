@@ -59,24 +59,8 @@ export default function About() {
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
 
-  <View style={styles.themeToggleContainer}>
-  <Text style={[styles.themeText, { color: theme.text }]}>
-    {isDarkMode ? t("Dark Mode") : t("Light Mode")}
-  </Text>
-  <TouchableOpacity onPress={toggleTheme}>
-    <Image
-      source={require("../../assets/images/dark-mode.png")}
-      style={styles.themeIcon}
-    />
-  </TouchableOpacity>
-</View>
 
-      <View style={styles.topRight}>
-        <TouchableOpacity onPress={() => handleLanguageChange(currentLang === 'en' ? 'ru' : 'en')}>
-          <Image source={require('../../assets/images/language.png')} style={styles.langIcon} />
-        </TouchableOpacity>
-      </View>
-  
+    
       <Text style={[styles.heading, { color: theme.text }]}>{t('appTitle')}</Text>
       
       <View key={isDarkMode? 'dark' : 'light'}>
