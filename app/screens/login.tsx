@@ -71,7 +71,7 @@ const handleSubmit = async () => {
         text2: t('welcomeBack'),
       });
       if (onLogin) onLogin();
-      navigation.navigate('Account');
+      // navigation.navigate('Account');
     } else {
       await register(email, password, name, surname);
       Toast.show({

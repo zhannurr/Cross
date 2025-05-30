@@ -42,7 +42,7 @@ export default function OfflinePage() {
           {t('no_internet_connection') || 'No Internet Connection'}
         </Text>
 
-        <Text style={[styles.message, { color: theme.secondaryText }]}>
+        <Text style={[styles.message, { color: theme.text }]}>
           {t('check_connection_message') || 'There is a problem with Internet connection, please check your connection'}
         </Text>
 
