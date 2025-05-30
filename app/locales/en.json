@@ -70,6 +70,11 @@
   "changesSaved": "Changes saved successfully",
   "continueAsGuest": "Continue as Guest",
   "guestModeWarning": "You're using the app in guest mode. Some features may be limited.",
-  "exitGuestMode": "Exit Guest Mode"
+  "exitGuestMode": "Exit Guest Mode",
+  "no_internet_connection": "No Internet Connection",
+    "check_connection_message": "There is a problem with Internet connection, please check your connection",
+    "sync_now": "Sync Now",
+    "syncing": "Syncing...",
+    "offline_help": "Once your connection is restored, this page will automatically disappear."
       }
       
